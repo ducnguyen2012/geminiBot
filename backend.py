@@ -9,8 +9,12 @@ from langchain_community.vectorstores.faiss import FAISS
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain.chains.question_answering import load_qa_chain
 from langchain.prompts import PromptTemplate
+from dotenv import load_dotenv
+import os
 
-genai.configure(api_key="AIzaSyAI0ZEVrsI-rjG-D8M2IV3yWxG_IGhqF7A")
+# Load environment variables from the .env file
+load_dotenv()
+genai.configure(api_key=os.getenv('KEY'))
 
 def get_pdf_text(pdf_docs):
     text = ''
