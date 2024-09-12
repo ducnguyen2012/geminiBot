@@ -8,3 +8,4 @@ Python-IO
 flask
 flask_cors
 pypdf
+python-dotenv
