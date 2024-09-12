@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatBot</title>
+    <style>
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100vh;
+            background-color: #FFF8E8;
+        }
+
+        .chat-box {
+            padding: 20px;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        .chat-bubble {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+        }
+
+        .chat-bubble.user {
+            justify-content: flex-end; /* User messages on the right */
+        }
+
+        .chat-bubble.bot {
+            justify-content: flex-start; /* Bot messages on the left */
+        }
+
+        .message-content {
+            display: flex;
+            align-items: center;
+        }
+
+        .message-icon {
+            width: 30px;
+            height: 30px;
+            margin-right: 10px;
+        }
+
+        .message-text {
+            background-color: white;
+            padding: 10px;
+            border-radius: 15px;
+            max-width: 60%;
+        }
+
+        .chat-bubble.user .message-text {
+            background-color: #20cf26;
+            color: white;
+        }
+
+        .chat-bubble.bot .message-text {
+            background-color: #f1f1f1;
+            color: black;
+        }
+
+        .chatbot-is-thinking {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            margin-left: 10px;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            background-color: black;
+            border-radius: 50%;
+            margin: 0 3px;
+            animation: blink 1.5s infinite ease-in-out;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 1; }
+        }
+
+        .input-box {
+            display: flex;
+            padding: 10px;
+            background-color: white;
+            border-top: 1px solid #ddd;
+        }
+
+        .input-box input {
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 20px;
+        }
+
+        .input-box button {
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin-left: 10px;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+
+        .input-box button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-box" id="chatBox">
+            <!-- Messages will be dynamically inserted here -->
+        </div>
+        <div class="input-box">
+            <input type="text" id="userInput" placeholder="Type a message..." />
+            <button onclick="handleSend()">Send</button>
+        </div>
+        <div id="chatbotThinking" class="chatbot-is-thinking" style="display: none;">
+            <p>I am thinking about your question hihi</p>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+        </div>
+    </div>
+
+    <script>
+        const chatBox = document.getElementById('chatBox');
+        const userInput = document.getElementById('userInput');
+        const chatbotThinking = document.getElementById('chatbotThinking');
+        const userIcon = 'path_to_user_icon.png'; // Replace with actual path
+        const chatBotIcon = 'path_to_chatbot_icon.png'; // Replace with actual path
+
+        async function handleSend() {
+            const input = userInput.value.trim();
+            if (input === '') return;
+
+            // Add user message
+            appendMessage('user', input);
+
+            // Show thinking animation
+            chatbotThinking.style.display = 'flex';
+
+            // Clear input field
+            userInput.value = '';
+
+            try {
+                const response = await fetch('http://127.0.0.1:5000/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message: input }),
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                const botMessage = data.response || 'No response from bot';
+                appendMessage('bot', botMessage);
+            } catch (error) {
+                appendMessage('bot', 'Network error: ' + error.message);
+            } finally {
+                chatbotThinking.style.display = 'none';
+            }
+        }
+
+        function appendMessage(sender, text) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `chat-bubble ${sender}`;
+            messageDiv.innerHTML = `
+                <div class="message-content">
+                    <img src="${sender === 'user' ? userIcon : chatBotIcon}" alt="${sender} icon" class="message-icon" />
+                    <span class="message-text">${text}</span>
+                </div>
+            `;
+            chatBox.appendChild(messageDiv);
+            chatBox.scrollTop = chatBox.scrollHeight; // Scroll to the bottom
+        }
+
+        // Handle Enter key press
+        userInput.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                handleSend();
+            }
+        });
+    </script>
+</body>
+</html>

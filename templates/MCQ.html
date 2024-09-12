@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCQ Page</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='mcq.css') }}">
+</head>
+<body>
+    <form class="mcq-form" id="mcqForm">
+        <div class="form-group">
+            <label for="numQuestions">Number of Questions:</label>
+            <input
+                type="text"
+                id="numQuestions"
+                placeholder="Enter number of questions"
+                class="input-field"
+            />
+        </div>
+        <div class="form-group">
+            <label for="subject">Subject:</label>
+            <input
+                type="text"
+                id="subject"
+                placeholder="Enter subject of questions"
+                class="input-field"
+            />
+        </div>
+        <div class="form-group">
+            <label for="tone">Level:</label>
+            <input
+                type="text"
+                id="tone"
+                placeholder="Enter level of questions"
+                class="input-field"
+            />
+        </div>
+        <button type="button" onclick="handleFetchQuestion()" class="fetch-btn">Fetch Questions</button>
+
+        <div id="loading" class="loading" style="display:none;">
+            <p>Loading questions</p>
+            <div class="dot-container">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+            </div>
+        </div>
+
+        <div id="questionsContainer" class="questions-container"></div>
+    </form>
+
+    <script>
+        function handleFetchQuestion() {
+            const numQuestions = document.getElementById('numQuestions').value;
+            const subject = document.getElementById('subject').value;
+            const tone = document.getElementById('tone').value;
+
+            document.getElementById('loading').style.display = 'block';
+
+            fetch('/question', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ numQuestions, subject, tone })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                handleResponse(data);
+                document.getElementById('loading').style.display = 'none';
+            })
+            .catch(error => {
+                console.error('Error fetching questions:', error);
+                document.getElementById('loading').style.display = 'none';
+            });
+        }
+
+        function handleResponse(data) {
+            const questionsContainer = document.getElementById('questionsContainer');
+            questionsContainer.innerHTML = '';
+
+            Object.values(data).forEach((q, index) => {
+                const questionBlock = document.createElement('div');
+                questionBlock.className = 'question-block';
+                questionBlock.innerHTML = `
+                    <h3>${index + 1}) ${q.mcq}</h3>
+                    <div class="options-container">
+                        ${Object.entries(q.options).map(([key, value]) => `
+                            <label class="option-label">
+                                <input type="radio" name="question-${index}" value="${key}" class="option-input" />
+                                <span>${value}</span>
+                            </label>
+                        `).join('')}
+                    </div>
+                    ${q.feedback ? `<p class="feedback ${q.correct === q.selected ? 'correct' : 'wrong'}">${q.feedback}</p>` : ''}
+                `;
+                questionsContainer.appendChild(questionBlock);
+            });
+        }
+    </script>
+</body>
+</html>
+
