@@ -82,7 +82,7 @@ def ChatBot(pdf_path: str,user_question: str):
 from flask import Flask, jsonify, request, render_template
 from flask_cors import CORS
 
-import openai
+
 
 app = Flask(__name__)
 CORS(app)
@@ -156,4 +156,4 @@ def index():
 #         return jsonify({"valid": False, "error": "An error occurred: " + str(e)}), 500
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=10000, debug=True)
