@@ -4,7 +4,7 @@ langchain
 langchain_google_genai
 google
 langchain_community
-io
+Python-IO
 flask
 flask_cors
-
+pypdf
