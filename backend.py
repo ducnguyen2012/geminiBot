@@ -80,12 +80,12 @@ def ChatBot(pdf_path: str,user_question: str):
 
 
 from flask import Flask, jsonify, request, render_template
-from flask_cors import CORS
+
 
 
 
 app = Flask(__name__)
-CORS(app)
+
 
 # Use an absolute path or configurable environment variable
 FILEPATH = './Cells and Chemistry of Life.pdf'
