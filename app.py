@@ -38,7 +38,7 @@ def get_text_chunks(text):
     return chunks
 
 def get_vector_store(text_chunks):
-    embeddings = GoogleGenerativeAIEmbeddings(model='models/embedding-001')
+    embeddings = GoogleGenerativeAIEmbeddings(model='models/embedding-001', google_api_key=os.getenv('KEY'))
     vector_store = FAISS.from_texts(text_chunks, embedding=embeddings)
     vector_store.save_local('faiss-index')
 
@@ -52,14 +52,14 @@ def get_conversational_chain():
 
     Answer:
     '''
-    model = ChatGoogleGenerativeAI(model='gemini-pro', temperature=0.1)
+    model = ChatGoogleGenerativeAI(model='gemini-pro', temperature=0.1, google_api_key=os.getenv('KEY'))
 
     prompt = PromptTemplate(template=prompt_template, input_variables=['context', 'question'])
     chain = load_qa_chain(model, chain_type='stuff', prompt=prompt)
     return chain
 
 def ChatBot(pdf_path: str,user_question: str):
-    embeddings = GoogleGenerativeAIEmbeddings(model='models/embedding-001')
+    embeddings = GoogleGenerativeAIEmbeddings(model='models/embedding-001', google_api_key=os.getenv('KEY'))
 
     try:
         new_db = FAISS.load_local('faiss-index', embeddings, allow_dangerous_deserialization=True)
